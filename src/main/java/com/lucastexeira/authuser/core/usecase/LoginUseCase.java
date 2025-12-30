@@ -35,7 +35,8 @@ public class LoginUseCase implements LoginInputPort {
     }
 
     String token = tokenService.generateToken(user);
+    String refreshToken = tokenService.generateRefreshToken(user);
 
-    return new AuthResult(token);
+    return new AuthResult(token, refreshToken);
   }
 }
