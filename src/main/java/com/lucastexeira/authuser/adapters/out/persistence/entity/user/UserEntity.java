@@ -1,7 +1,9 @@
 package com.lucastexeira.authuser.adapters.out.persistence.entity.user;
 
+import com.lucastexeira.authuser.common.enums.Role;
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -22,9 +24,13 @@ public class UserEntity {
   @Column(nullable = false)
   private String email;
 
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private Role role;
+
 
   @Column(name = "created_at", nullable = false, updatable = false)
-  private LocalDateTime createdAt;
+  private LocalDate createdAt;
 
 
 
@@ -42,10 +48,18 @@ public class UserEntity {
   @PrePersist
   private void onCreate() {
     if (this.createdAt == null) {
-      this.createdAt = LocalDateTime.now();
+      this.createdAt = LocalDate.now();
     }
   }
 
+
+  public Role getRole() {
+    return role;
+  }
+
+  public void setRole(Role role) {
+    this.role = role;
+  }
 
   public UUID getId() {
     return id;
@@ -79,7 +93,7 @@ public class UserEntity {
     this.email = email;
   }
 
-  public LocalDateTime getCreatedAt() {
+  public LocalDate getCreatedAt() {
     return createdAt;
   }
 
