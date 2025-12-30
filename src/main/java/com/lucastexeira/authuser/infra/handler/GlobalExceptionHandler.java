@@ -1,6 +1,7 @@
 package com.lucastexeira.authuser.infra.handler;
 
 import com.lucastexeira.authuser.core.exception.UserAlreadyExistsException;
+import com.lucastexeira.authuser.core.exception.WrongCredentialsException;
 import com.lucastexeira.authuser.infra.handler.model.ErrorResponseHandler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,15 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(UserAlreadyExistsException.class)
   public ResponseEntity<ErrorResponseHandler> handleUserAlreadyExistsException(UserAlreadyExistsException ex) {
     Map<String, String> datails = Map.of("user", ex.getMessage());
+    ErrorResponseHandler errorResponse = ErrorResponseHandler.of(datails,
+        HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+  }
+
+  @ExceptionHandler(WrongCredentialsException.class)
+  public ResponseEntity<ErrorResponseHandler> handleWrongCredentials(WrongCredentialsException ex) {
+    Map<String, String> datails = Map.of("credentials", ex.getMessage());
     ErrorResponseHandler errorResponse = ErrorResponseHandler.of(datails,
         HttpStatus.BAD_REQUEST.value(), ex.getMessage());
 
