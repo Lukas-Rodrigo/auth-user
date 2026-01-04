@@ -1,6 +1,6 @@
 package com.lucastexeira.authuser.core.port.in;
 
-import com.lucastexeira.authuser.domain.User;
+import com.lucastexeira.authuser.core.domain.User;
 
 public interface CreateUserInputPort {
 
