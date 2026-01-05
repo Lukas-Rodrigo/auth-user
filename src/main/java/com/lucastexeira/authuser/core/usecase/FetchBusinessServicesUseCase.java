@@ -3,7 +3,7 @@ package com.lucastexeira.authuser.core.usecase;
 import com.lucastexeira.authuser.core.domain.User;
 import com.lucastexeira.authuser.core.domain.businessservices.BusinessService;
 import com.lucastexeira.authuser.core.exception.UserNotFoundException;
-import com.lucastexeira.authuser.core.port.in.FetchBusinessServicesInputPort;
+import com.lucastexeira.authuser.core.port.in.businessservice.FetchBusinessServicesInputPort;
 import com.lucastexeira.authuser.core.port.out.businessservices.FetchBusinessServicesOutputPort;
 import com.lucastexeira.authuser.core.port.out.user.FindUserByIdOutputPort;
 import com.lucastexeira.authuser.core.usecase.query.FetchQuery;
