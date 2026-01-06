@@ -19,6 +19,19 @@ public class BusinessService {
   }
 
   public BusinessService(
+      UUID userId,
+      String name,
+      Integer price,
+      Integer duration
+  ) {
+    this.userId = userId;
+    this.createdAt = LocalDate.now();
+    this.name = name;
+    this.price = price;
+    this.duration = duration;
+  }
+
+  public BusinessService(
       UUID id,
       UUID userId,
       String name,
@@ -34,6 +47,39 @@ public class BusinessService {
     this.duration = duration;
     this.createdAt = createdAt;
     this.deletedAt = deletedAt;
+  }
+
+  public void updateName(String name) {
+
+    if (this.name.equals(name)) {
+      return;
+    }
+
+    if (name != null && !name.isBlank()) {
+      this.name = name;
+    }
+  }
+
+  public void updatePrice(Integer price) {
+
+    if (this.price.equals(price)) {
+      return;
+    }
+
+    if (price != null && price >= 0) {
+      this.price = price;
+    }
+  }
+
+  public void updateDuration(Integer duration) {
+
+    if (this.duration.equals(duration)) {
+      return;
+    }
+
+    if (duration != null && duration > 0) {
+      this.duration = duration;
+    }
   }
 
   public UUID getId() {
