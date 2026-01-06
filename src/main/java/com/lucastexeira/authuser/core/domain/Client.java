@@ -1,7 +1,10 @@
 package com.lucastexeira.authuser.core.domain;
 
 
+import com.lucastexeira.authuser.core.exception.ClientAlreadyExistsException;
+
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.UUID;
 
 public class Client {
@@ -27,6 +30,21 @@ public class Client {
   }
 
   public Client(
+      UUID userId,
+      String name,
+      String phoneNumber,
+      String profileUrl,
+      String observations
+  ) {
+    this.userId = userId;
+    this.name = name;
+    this.phoneNumber = phoneNumber;
+    this.profileUrl = profileUrl;
+    this.observations = observations;
+    this.createdAt = LocalDate.now();
+  }
+
+  public Client(
       UUID id,
       String name,
       String phoneNumber,
@@ -44,6 +62,58 @@ public class Client {
     this.createdAt = createdAt;
     this.deletedAt = deletedAt;
     this.userId = userId;
+  }
+
+  boolean toBeModified() {
+    return this.deletedAt == null;
+  }
+
+  public void updateName(String name) {
+    if (this.name.equals(name)) {
+      return;
+    }
+
+    if (name != null && !name.isBlank()) {
+      this.name = name;
+    }
+  }
+
+  public void updatePhoneNumber(String phoneNumber) {
+    if (this.phoneNumber.equals(phoneNumber)) {
+      return;
+    }
+
+    if (phoneNumber != null && !phoneNumber.isBlank()) {
+      this.phoneNumber = phoneNumber;
+    }
+  }
+
+  public void updateProfileUrl(String profileUrl) {
+    if (Objects.equals(this.profileUrl, profileUrl)) {
+      return;
+    }
+
+    if (profileUrl != null && !profileUrl.isBlank()) {
+      this.profileUrl = profileUrl;
+    }
+  }
+
+  public void updateObservations(String observations) {
+
+    if (Objects.equals(this.observations, observations)) {
+      return;
+    }
+
+    if (observations != null && !observations.isBlank()) {
+      this.observations = observations;
+    }
+  }
+
+  public void verifyPhoneNumberAndNameUnique(String name) {
+   if (this.name.equalsIgnoreCase(name)) {
+     throw new ClientAlreadyExistsException(
+         "Client with name and Phone number already exists for this user.");
+   }
   }
 
   public boolean belongsTo(UUID userId) {
