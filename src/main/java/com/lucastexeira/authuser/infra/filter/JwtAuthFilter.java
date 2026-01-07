@@ -1,7 +1,7 @@
 package com.lucastexeira.authuser.infra.filter;
 
 
-import com.lucastexeira.authuser.core.port.out.TokenServiceOutputPort;
+import com.lucastexeira.authuser.core.port.out.authentication.TokenServiceOutputPort;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -33,25 +33,33 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
   private final TokenServiceOutputPort tokenService;
 
-  public JwtAuthFilter(@Value("${jwt.SECRET_KEY}") String secret, TokenServiceOutputPort tokenService) {
-    this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+  public JwtAuthFilter(
+      @Value("${jwt.SECRET_KEY}") String secret,
+      TokenServiceOutputPort tokenService
+  ) {
+    this.secretKey = Keys.hmacShaKeyFor(
+        secret.getBytes(StandardCharsets.UTF_8));
     this.tokenService = tokenService;
   }
 
   @Override
-  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+  protected void doFilterInternal(
+      HttpServletRequest request,
+      HttpServletResponse response,
+      FilterChain filterChain
+  ) throws ServletException, IOException {
 
     String token = extractTokenFromCookie(request);
 
     if (token != null && this.tokenService.isTokenValid(token)) {
-        try {
-          Authentication authentication = getAuthentication(token);
-          SecurityContextHolder.getContext().setAuthentication(authentication);
-        } catch (JwtException ex) {
-          SecurityContextHolder.clearContext();
-          response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-          return;
-        }
+      try {
+        Authentication authentication = getAuthentication(token);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+      } catch (JwtException ex) {
+        SecurityContextHolder.clearContext();
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        return;
+      }
 
     }
     filterChain.doFilter(request, response);
@@ -62,7 +70,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     Claims claims = parseClaims(token);
 
     String role = claims.get("role", String.class);
-    List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+    List<GrantedAuthority> authorities = List.of(
+        new SimpleGrantedAuthority("ROLE_" + role));
 
     return new UsernamePasswordAuthenticationToken(
         claims.getSubject(),
@@ -80,7 +89,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
   }
 
   private String extractTokenFromCookie(HttpServletRequest request) {
-    if (request.getCookies() == null) return null;
+    if (request.getCookies() == null) {
+      return null;
+    }
 
     return Arrays.stream(request.getCookies())
         .filter(cookie -> "access_token".equals(cookie.getName()))

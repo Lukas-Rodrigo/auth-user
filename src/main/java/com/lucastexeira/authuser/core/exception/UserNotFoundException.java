@@ -1,8 +1,10 @@
 package com.lucastexeira.authuser.core.exception;
 
-public class UserNotFoundException extends RuntimeException{
+import java.util.UUID;
 
-  public UserNotFoundException(String message) {
-    super(message);
+public class UserNotFoundException extends NotFoundException {
+
+  public UserNotFoundException(UUID user) {
+    super("User with id " + user + " not found.");
   }
 }
