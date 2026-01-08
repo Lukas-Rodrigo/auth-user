@@ -5,10 +5,11 @@ import com.lucastexeira.authuser.common.enums.AppointmentStatus;
 import com.lucastexeira.authuser.common.event.DomainEvent;
 import com.lucastexeira.authuser.core.domain.appointment.event.AppointmentScheduledEvent;
 import com.lucastexeira.authuser.core.domain.businessservices.BusinessService;
+import com.lucastexeira.authuser.core.domain.valueobject.Money;
 import com.lucastexeira.authuser.core.exception.AppointmentCannotBeModifiedException;
-import com.lucastexeira.authuser.core.exception.BusinessServiceNotFoundException;
 import com.lucastexeira.authuser.core.exception.InvalidScheduleDateException;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,7 +28,8 @@ public class Appointment {
   private LocalDate updatedAt;
   private UUID clientId;
   private List<AppointmentService> services;
-  private Integer totalPrice;
+  private Money totalPrice;
+  private Duration totalDuration;
 
   public Appointment() {
   }
@@ -42,14 +44,20 @@ public class Appointment {
     this.clientId = clientId;
     this.services = new ArrayList<>();
     this.status = AppointmentStatus.PENDING;
+    this.totalPrice = Money.zero();
   }
 
-  public static Appointment schedule(Appointment appointment) {
+  public static Appointment scheduleEvent(Appointment appointment) {
     appointment.registerEvent(
         new AppointmentScheduledEvent(appointment.id, Instant.now()
             , Instant.now())
     );
     return appointment;
+  }
+
+  public Duration getTotalDuration() {
+    return this.services.stream().map(AppointmentService::getDuration)
+        .reduce(Duration.ZERO, Duration::plus);
   }
 
 
@@ -67,45 +75,46 @@ public class Appointment {
     return this.clientId.equals(clientId);
   }
 
+  void recalculateTotal() {
+    this.totalPrice = services.stream()
+        .map(service ->
+            service.getAppliedPrice()
+                .subtract(service.getDiscount())
+        )
+        .reduce(Money.zero(), Money::add);
+  }
+
+
   public void addService(
       BusinessService service,
-      Integer discount
+      Money discount
   ) {
-    if (service == null) {
-      throw new IllegalArgumentException("service must not be null");
+    if (!canBeModified()) {
+      throw new AppointmentCannotBeModifiedException();
     }
+
     AppointmentService appointmentService = new AppointmentService(
-        null,
-        service.getId(),
-        service.getPrice(),
+        this.id,
+        service,
         discount
     );
     services.add(appointmentService);
-    this.totalPrice();
+    this.recalculateTotal();
   }
+
 
   public void clearServices() {
     if (!canBeModified()) {
       throw new AppointmentCannotBeModifiedException();
     }
-    this.services.clear();
-    this.totalPrice = 0;
-  }
 
-  void totalPrice() {
-    this.totalPrice = services.stream()
-        .mapToInt(service -> {
-          int price = service.getAppliedPrice();
-          int discount = service.getDiscount() != null ? service.getDiscount() : 0;
-          return price - discount;
-        })
-        .sum();
+    this.services.clear();
+    this.totalPrice = Money.zero();
   }
 
   boolean canBeModified() {
     return this.status != AppointmentStatus.CANCELED &&
         this.status != AppointmentStatus.COMPLETED;
-
   }
 
   public void updateStatus(AppointmentStatus status) {
@@ -199,11 +208,15 @@ public class Appointment {
   }
 
 
-  public Integer getTotalPrice() {
+  public List<DomainEvent> getDomainEvents() {
+    return domainEvents;
+  }
+
+  public Money getTotalPrice() {
     return totalPrice;
   }
 
-  public void setTotalPrice(Integer totalPrice) {
+  public void setTotalPrice(Money totalPrice) {
     this.totalPrice = totalPrice;
   }
 
@@ -261,5 +274,21 @@ public class Appointment {
 
   public void setServices(List<AppointmentService> services) {
     this.services = services;
+  }
+
+  @Override
+  public String toString() {
+    return "Appointment{" +
+        "domainEvents=" + domainEvents +
+        ", id=" + id +
+        ", scheduledAt=" + scheduledAt +
+        ", status=" + status +
+        ", createdAt=" + createdAt +
+        ", updatedAt=" + updatedAt +
+        ", clientId=" + clientId +
+        ", services=" + services +
+        ", totalPrice=" + totalPrice +
+        ", totalDuration=" + totalDuration +
+        '}';
   }
 }
