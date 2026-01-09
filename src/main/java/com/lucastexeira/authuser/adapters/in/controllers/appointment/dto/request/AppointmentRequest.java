@@ -2,7 +2,9 @@ package com.lucastexeira.authuser.adapters.in.controllers.appointment.dto.reques
 
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -21,7 +23,8 @@ public record AppointmentRequest(
       @NotBlank(message = "The business service ID cannot be blank")
       UUID businessServiceId,
 
-      Integer discount
+      @Positive(message = "The price must be a positive value")
+      BigDecimal discount
   ) {
   }
 
