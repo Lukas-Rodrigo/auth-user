@@ -47,12 +47,10 @@ public class Appointment {
     this.totalPrice = Money.zero();
   }
 
-  public static Appointment scheduleEvent(Appointment appointment) {
-    appointment.registerEvent(
-        new AppointmentScheduledEvent(appointment.id, Instant.now()
-            , Instant.now())
+  public void scheduleEvent() {
+    this.registerEvent(
+        new AppointmentScheduledEvent(Instant.now(), this)
     );
-    return appointment;
   }
 
   public Duration getTotalDuration() {
@@ -135,6 +133,7 @@ public class Appointment {
     }
 
     this.status = status;
+    this.scheduleEvent();
   }
 
   public void reschedule(LocalDateTime newDateTime) {
@@ -152,10 +151,7 @@ public class Appointment {
     }
 
     this.scheduledAt = newDateTime;
-    this.registerEvent(new AppointmentScheduledEvent(
-        this.id,
-        Instant.now(),
-        Instant.now()
+    this.registerEvent(new AppointmentScheduledEvent(Instant.now(), this
     ));
   }
 

@@ -1,5 +1,9 @@
 package com.lucastexeira.authuser.core.domain.businessservices;
 
+import com.lucastexeira.authuser.core.domain.valueobject.Money;
+
+import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -9,8 +13,8 @@ public class BusinessService {
   private UUID userId;
 
   private String name;
-  private Integer price;
-  private Integer duration;
+  private Money price;
+  private Duration duration;
 
   private LocalDate createdAt;
   private LocalDate deletedAt;
@@ -21,22 +25,27 @@ public class BusinessService {
   public BusinessService(
       UUID userId,
       String name,
-      Integer price,
-      Integer duration
+      Money price,
+      Duration duration
   ) {
+    if (duration == null || duration.isZero() || duration.isNegative()) {
+      throw new IllegalArgumentException("Duration must be greater than zero");
+    }
+
     this.userId = userId;
-    this.createdAt = LocalDate.now();
     this.name = name;
     this.price = price;
     this.duration = duration;
+    this.createdAt = LocalDate.now();
   }
+
 
   public BusinessService(
       UUID id,
       UUID userId,
       String name,
-      Integer price,
-      Integer duration,
+      Money price,
+      Duration duration,
       LocalDate createdAt,
       LocalDate deletedAt
   ) {
@@ -60,26 +69,26 @@ public class BusinessService {
     }
   }
 
-  public void updatePrice(Integer price) {
+  public void updatePrice(Money price) {
 
     if (this.price.equals(price)) {
       return;
     }
 
-    if (price != null && price >= 0) {
-      this.price = price;
-    }
+    this.price.add(price);
   }
 
-  public void updateDuration(Integer duration) {
+  public void updateDuration(Duration newDuration) {
 
-    if (this.duration.equals(duration)) {
+    if (newDuration == null || newDuration.isZero() || newDuration.isNegative()) {
+      throw new IllegalArgumentException("Duration must be greater than zero");
+    }
+
+    if (this.duration.equals(newDuration)) {
       return;
     }
 
-    if (duration != null && duration > 0) {
-      this.duration = duration;
-    }
+    this.duration = newDuration;
   }
 
   public UUID getId() {
@@ -106,19 +115,20 @@ public class BusinessService {
     this.name = name;
   }
 
-  public Integer getPrice() {
+
+  public Money getPrice() {
     return price;
   }
 
-  public void setPrice(Integer price) {
+  public void setPrice(Money price) {
     this.price = price;
   }
 
-  public Integer getDuration() {
+  public Duration getDuration() {
     return duration;
   }
 
-  public void setDuration(Integer duration) {
+  public void setDuration(Duration duration) {
     this.duration = duration;
   }
 
