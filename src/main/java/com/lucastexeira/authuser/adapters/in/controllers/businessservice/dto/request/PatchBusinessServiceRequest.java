@@ -3,6 +3,8 @@ package com.lucastexeira.authuser.adapters.in.controllers.businessservice.dto.re
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
+import java.math.BigDecimal;
+
 public record PatchBusinessServiceRequest(
     @Size(min = 2, message = "Name must have at least 2 characters")
     String name,
@@ -11,9 +13,9 @@ public record PatchBusinessServiceRequest(
     String description,
 
     @Min(value = 1, message = "Price must be at least 1")
-    Integer price,
+    BigDecimal price,
 
     @Min(value = 1, message = "Duration must be at least 1")
-    Integer duration
+    Long duration
 ) {
 }

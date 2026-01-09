@@ -4,15 +4,17 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.math.BigDecimal;
+
 public record CreateBusinessServiceRequest(
     @NotBlank(message = "Name is required")
     String name,
     @NotNull(message = "price is required")
     @Min(value = 1, message = "price must be greater than or equal to 1")
-    Integer price,
+    BigDecimal price,
     @NotNull(message = "duration is required")
     @Min(value = 1, message = "duration must be greater than or equal to 1")
-    Integer duration
+    Long duration
 ) {
 
 

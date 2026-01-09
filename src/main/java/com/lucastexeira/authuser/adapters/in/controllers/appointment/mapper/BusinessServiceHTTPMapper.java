@@ -14,8 +14,8 @@ public class BusinessServiceHTTPMapper {
         service -> new BusinessServiceResponse(
             service.getId(),
             service.getName(),
-            service.getPrice(),
-            service.getDuration()
+            service.getPrice().getAmount(),
+            service.getDuration().toMinutes()
         )).toList();
 
     var meta = new MetaPaginationResponse(
