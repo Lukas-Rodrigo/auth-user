@@ -1,6 +1,7 @@
 package com.lucastexeira.authuser.core.domain.appointment.event;
 
 import com.lucastexeira.authuser.common.event.DomainEvent;
+import com.lucastexeira.authuser.core.domain.appointment.Appointment;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -8,18 +9,16 @@ import java.util.UUID;
 public class AppointmentScheduledEvent implements DomainEvent {
 
 
-  private final UUID appointmentId;
-  private final Instant scheduledAt;
   private final Instant occurredOn;
 
+  private final Appointment appointment;
+
   public AppointmentScheduledEvent(
-      UUID appointmentId,
-      Instant scheduledAt,
-      Instant occurredOn
+      Instant occurredOn,
+      Appointment appointment
   ) {
-    this.appointmentId = appointmentId;
-    this.scheduledAt = scheduledAt;
     this.occurredOn = occurredOn;
+    this.appointment = appointment;
   }
 
   @Override
@@ -27,12 +26,9 @@ public class AppointmentScheduledEvent implements DomainEvent {
     return occurredOn;
   }
 
-  public UUID getAppointmentId() {
-    return appointmentId;
+  public Appointment getAppointment() {
+    return appointment;
   }
 
 
-  public Instant getScheduledAt() {
-    return scheduledAt;
-  }
 }
