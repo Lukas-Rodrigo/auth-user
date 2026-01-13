@@ -1,7 +1,7 @@
 package com.lucastexeira.authuser.adapters.out.jwt;
 
-import com.lucastexeira.authuser.core.port.out.TokenServiceOutputPort;
 import com.lucastexeira.authuser.core.domain.User;
+import com.lucastexeira.authuser.core.port.out.authentication.TokenServiceOutputPort;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,7 +28,8 @@ public class TokenServiceAdapter implements TokenServiceOutputPort {
         .setSubject(user.getId())
         .claim("role", user.getRole().name())
         .setIssuedAt(new Date())
-        .setExpiration(new Date(System.currentTimeMillis() + secretKeyExpirationTime))
+        .setExpiration(
+            new Date(System.currentTimeMillis() + secretKeyExpirationTime))
         .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
         .compact();
   }
@@ -39,7 +40,8 @@ public class TokenServiceAdapter implements TokenServiceOutputPort {
         .setSubject(user.getId())
         .claim("type", "REFRESH")
         .setIssuedAt(new Date())
-        .setExpiration(new Date(System.currentTimeMillis() + refreshKeyExpirationTime))
+        .setExpiration(
+            new Date(System.currentTimeMillis() + refreshKeyExpirationTime))
         .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
         .compact();
   }
@@ -77,6 +79,6 @@ public class TokenServiceAdapter implements TokenServiceOutputPort {
       return true;
     } catch (Exception e) {
       return false;
-  }
+    }
   }
 }
