@@ -2,7 +2,8 @@ package com.lucastexeira.authuser.common.enums;
 
 public enum WhatsappSessionStatus {
   CONNECTED("CONNECTED"),
-  DISCONNECTED("DISCONNECTED");
+  DISCONNECTED("DISCONNECTED"),
+  QR_GENERATED("QR_GENERATED");
 
   private final String status;
 
