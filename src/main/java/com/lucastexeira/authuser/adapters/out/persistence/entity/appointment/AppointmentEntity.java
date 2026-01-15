@@ -5,6 +5,8 @@ import com.lucastexeira.authuser.adapters.out.persistence.entity.client.ClientEn
 import com.lucastexeira.authuser.common.enums.AppointmentStatus;
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -38,11 +40,12 @@ public class AppointmentEntity {
   private List<AppointmentServiceEntity> services;
 
   @Column(name = "total_price")
-  private Integer totalPrice;
+  private BigDecimal totalPrice;
 
   public AppointmentEntity() {
 
   }
+
 
   public AppointmentEntity(
       UUID id,
@@ -51,7 +54,8 @@ public class AppointmentEntity {
       LocalDate createdAt,
       LocalDate updatedAt,
       ClientEntity client,
-      List<AppointmentServiceEntity> services
+      List<AppointmentServiceEntity> services,
+      BigDecimal totalPrice
   ) {
     this.id = id;
     this.scheduledAt = scheduledAt;
@@ -60,6 +64,7 @@ public class AppointmentEntity {
     this.updatedAt = updatedAt;
     this.client = client;
     this.services = services;
+    this.totalPrice = totalPrice;
   }
 
   public UUID getId() {
@@ -118,11 +123,11 @@ public class AppointmentEntity {
     this.services = services;
   }
 
-  public Integer getTotalPrice() {
+  public BigDecimal getTotalPrice() {
     return totalPrice;
   }
 
-  public void setTotalPrice(Integer totalPrice) {
+  public void setTotalPrice(BigDecimal totalPrice) {
     this.totalPrice = totalPrice;
   }
 }

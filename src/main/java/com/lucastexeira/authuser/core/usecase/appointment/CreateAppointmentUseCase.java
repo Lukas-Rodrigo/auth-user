@@ -4,15 +4,21 @@ import com.lucastexeira.authuser.common.event.DomainEvent;
 import com.lucastexeira.authuser.common.event.DomainEventPublisher;
 import com.lucastexeira.authuser.core.domain.appointment.Appointment;
 import com.lucastexeira.authuser.core.domain.businessservices.BusinessService;
+import com.lucastexeira.authuser.core.domain.valueobject.Money;
+import com.lucastexeira.authuser.core.exception.BusinessServiceNotFoundException;
+import com.lucastexeira.authuser.core.exception.InvalidScheduleDateException;
 import com.lucastexeira.authuser.core.exception.UserDoesNotOwnException;
-import com.lucastexeira.authuser.core.port.in.CreateAppointmentInputPort;
+import com.lucastexeira.authuser.core.port.in.appointment.CreateAppointmentInputPort;
+import com.lucastexeira.authuser.core.port.out.appointment.FindActiveAppointmentByUserAndDayOutputPort;
 import com.lucastexeira.authuser.core.port.out.appointment.SaveAppointmentOutputPort;
 import com.lucastexeira.authuser.core.port.out.businessservices.FindBusinessServiceByIdOutputPort;
 import com.lucastexeira.authuser.core.port.out.client.ExistsByIdAndUserIdOutputPort;
+import com.lucastexeira.authuser.core.service.AppointmentScheduleService;
 import com.lucastexeira.authuser.core.usecase.command.CreateAppointmentCommand;
 import com.lucastexeira.authuser.core.usecase.command.ServiceItemCommand;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public class CreateAppointmentUseCase implements CreateAppointmentInputPort {
@@ -20,18 +26,25 @@ public class CreateAppointmentUseCase implements CreateAppointmentInputPort {
   private final ExistsByIdAndUserIdOutputPort existsByIdAndUserIdOutputPort;
   private final SaveAppointmentOutputPort saveAppointmentOutputPort;
   private final FindBusinessServiceByIdOutputPort findBusinessServiceByIdOutputPort;
+  private final AppointmentScheduleService appointmentScheduleService;
+  private final FindActiveAppointmentByUserAndDayOutputPort findActiveAppointmentByUserAndDayOutputPort;
+
   private final DomainEventPublisher domainEventPublisher;
 
   public CreateAppointmentUseCase(
-      ExistsByIdAndUserIdOutputPort existsByIdAndUserIdOutputPort,
-      SaveAppointmentOutputPort saveAppointmentOutputPort,
+      DomainEventPublisher domainEventPublisher,
+      FindActiveAppointmentByUserAndDayOutputPort findActiveAppointmentByUserAndDayOutputPort,
+      AppointmentScheduleService appointmentScheduleService,
       FindBusinessServiceByIdOutputPort findBusinessServiceByIdOutputPort,
-      DomainEventPublisher domainEventPublisher
+      SaveAppointmentOutputPort saveAppointmentOutputPort,
+      ExistsByIdAndUserIdOutputPort existsByIdAndUserIdOutputPort
   ) {
-    this.existsByIdAndUserIdOutputPort = existsByIdAndUserIdOutputPort;
     this.domainEventPublisher = domainEventPublisher;
-    this.saveAppointmentOutputPort = saveAppointmentOutputPort;
+    this.findActiveAppointmentByUserAndDayOutputPort = findActiveAppointmentByUserAndDayOutputPort;
+    this.appointmentScheduleService = appointmentScheduleService;
     this.findBusinessServiceByIdOutputPort = findBusinessServiceByIdOutputPort;
+    this.saveAppointmentOutputPort = saveAppointmentOutputPort;
+    this.existsByIdAndUserIdOutputPort = existsByIdAndUserIdOutputPort;
   }
 
   @Override
@@ -44,11 +57,11 @@ public class CreateAppointmentUseCase implements CreateAppointmentInputPort {
     );
 
     if (!ownsClient) {
-      throw new UserDoesNotOwnException("User does not own the client for this appointment");
+      throw new UserDoesNotOwnException();
     }
 
     if (command.scheduledAt().isBefore(LocalDateTime.now())) {
-      throw new RuntimeException("Scheduled date must be in the future");
+      throw new InvalidScheduleDateException();
     }
 
     Appointment appointmentToCreate = new Appointment(
@@ -60,26 +73,32 @@ public class CreateAppointmentUseCase implements CreateAppointmentInputPort {
       BusinessService service =
           findBusinessServiceByIdOutputPort.execute(item.businessServiceId());
 
-      System.out.println("service: " + service.toString());
-
-
       if (service == null) {
-        throw new RuntimeException(
-            "Business service not found: " + item.businessServiceId());
+        throw new BusinessServiceNotFoundException(item.businessServiceId());
       }
 
       if (!service.getUserId().equals(command.userId())) {
-        System.out.println("Service user ID: " + service.getUserId());
-        throw new UserDoesNotOwnException(
-            "User does not own the business service: " + item.businessServiceId());
+        throw new UserDoesNotOwnException();
       }
 
       appointmentToCreate.addService(
           service,
-          item.discount()
+          new Money(item.discount())
       );
     }
-    Appointment.schedule(appointmentToCreate);
+    List<Appointment> appointmentsOfDay = this.findActiveAppointmentByUserAndDayOutputPort.execute(
+        command.userId(),
+        command.scheduledAt().toLocalDate().atStartOfDay(),
+        command.scheduledAt().toLocalDate().plusDays(1).atStartOfDay()
+    );
+
+    this.appointmentScheduleService.validateDatetimeNoConflict(
+        appointmentToCreate,
+        appointmentsOfDay
+    );
+
+
+    Appointment.scheduleEvent(appointmentToCreate);
 
     var newAppointment =
         saveAppointmentOutputPort.execute(appointmentToCreate);

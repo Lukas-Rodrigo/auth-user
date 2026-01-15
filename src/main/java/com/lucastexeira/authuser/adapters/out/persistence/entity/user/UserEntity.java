@@ -4,7 +4,6 @@ import com.lucastexeira.authuser.common.enums.Role;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -21,7 +20,7 @@ public class UserEntity {
   @Column(nullable = false)
   private String password;
 
-  @Column(nullable = false)
+  @Column(name = "email", nullable = false, unique = true)
   private String email;
 
   @Enumerated(EnumType.STRING)
@@ -33,16 +32,21 @@ public class UserEntity {
   private LocalDate createdAt;
 
 
-
   public UserEntity() {
   }
 
-  public UserEntity(UUID id, String name, String password, String email, LocalDateTime createdAt) {
+  public UserEntity(
+      UUID id,
+      String name,
+      String password,
+      String email,
+      LocalDate createdAt
+  ) {
     this.id = id;
     this.name = name;
     this.password = password;
     this.email = email;
-    createdAt = createdAt;
+    this.createdAt = createdAt;
   }
 
   @PrePersist
@@ -97,7 +101,7 @@ public class UserEntity {
     return createdAt;
   }
 
-  public void setCreatedAt(LocalDateTime createdAt) {
-    createdAt = createdAt;
+  public void setCreatedAt(LocalDate createdAt) {
+    this.createdAt = createdAt;
   }
 }

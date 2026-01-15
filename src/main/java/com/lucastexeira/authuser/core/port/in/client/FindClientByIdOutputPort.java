@@ -1,4 +1,4 @@
-package com.lucastexeira.authuser.core.port.out.client;
+package com.lucastexeira.authuser.core.port.in.client;
 
 import com.lucastexeira.authuser.core.domain.Client;
 

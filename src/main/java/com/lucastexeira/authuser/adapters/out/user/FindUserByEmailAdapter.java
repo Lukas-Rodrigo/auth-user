@@ -1,13 +1,11 @@
 package com.lucastexeira.authuser.adapters.out.user;
 
-
 import com.lucastexeira.authuser.adapters.out.persistence.entity.user.UserEntity;
+import com.lucastexeira.authuser.adapters.out.persistence.entity.user.mapper.UserPersistenceMapper;
 import com.lucastexeira.authuser.adapters.out.persistence.repository.UserRepository;
-import com.lucastexeira.authuser.core.port.out.FindUserByEmailOutputPort;
-import com.lucastexeira.authuser.domain.User;
+import com.lucastexeira.authuser.core.domain.User;
+import com.lucastexeira.authuser.core.port.out.user.FindUserByEmailOutputPort;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
 
 @Component
 public class FindUserByEmailAdapter implements FindUserByEmailOutputPort {
@@ -19,30 +17,8 @@ public class FindUserByEmailAdapter implements FindUserByEmailOutputPort {
   }
 
   @Override
-  public Optional<User> find(String email) {
-   var userEntityOptional = userRepository.findByEmail(email);
-   return userEntityOptional.map(this::mapperToDomain);
-  }
-
-  private UserEntity mapperToEntity (User user){
-    return new UserEntity(
-        user.getId(),
-        user.getName(),
-        user.getPassword(),
-        user.getEmail(),
-        user.getCreatedAt()
-    );
-  }
-
-
-  private User mapperToDomain(UserEntity userEntity) {
-    return new User(
-        userEntity.getId(),
-        userEntity.getName(),
-        userEntity.getPassword(),
-        userEntity.getEmail(),
-        userEntity.getCreatedAt()
-    );
+  public User execute(String email) {
+    UserEntity userFound = userRepository.findByEmail(email).orElse(null);
+    return UserPersistenceMapper.INSTANCE.toDomain(userFound);
   }
 }
-

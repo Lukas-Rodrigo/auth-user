@@ -16,10 +16,10 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
   boolean existsByEmail(String email);
 
   @Query("""
-        SELECT u FROM UserEntity u
-        WHERE (:startDate IS NULL OR u.createdAt >= :startDate)
-          AND (:endDate IS NULL OR u.createdAt <= :endDate)
-    """)
+          SELECT u FROM UserEntity u
+          WHERE (:startDate IS NULL OR u.createdAt >= :startDate)
+            AND (:endDate IS NULL OR u.createdAt <= :endDate)
+      """)
   Page<UserEntity> findAllWithFilter(
       LocalDate startDate,
       LocalDate endDate,

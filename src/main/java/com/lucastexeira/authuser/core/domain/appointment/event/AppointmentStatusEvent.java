@@ -1,23 +1,20 @@
 package com.lucastexeira.authuser.core.domain.appointment.event;
 
 import com.lucastexeira.authuser.common.event.DomainEvent;
+import com.lucastexeira.authuser.core.domain.appointment.Appointment;
 
 import java.time.Instant;
-import java.util.UUID;
 
 public class AppointmentStatusEvent implements DomainEvent {
 
-  private final UUID appointmentId;
-  private final Instant scheduledAt;
+  private final Appointment appointment;
   private final Instant occurredOn;
 
   public AppointmentStatusEvent(
-      UUID appointmentId,
-      Instant scheduledAt,
+      Appointment appointment,
       Instant occurredOn
   ) {
-    this.appointmentId = appointmentId;
-    this.scheduledAt = scheduledAt;
+    this.appointment = appointment;
     this.occurredOn = occurredOn;
   }
 
@@ -26,17 +23,15 @@ public class AppointmentStatusEvent implements DomainEvent {
     return this.occurredOn;
   }
 
-  public UUID getAppointmentId() {
-    return this.appointmentId;
-  }
-
-  public Instant getScheduledAt() {
-    return this.scheduledAt;
-  }
-
   public Instant getOccurredOn() {
     return this.occurredOn;
   }
+
+  public Appointment getAppointment() {
+    return this.appointment;
+  }
+
+
 
 
 }

@@ -4,6 +4,8 @@ import java.util.UUID;
 
 public record WhatsAppNotificationMessage(
     UUID userId,
-    String message
+    String phoneNumber,
+    String message,
+    UUID referenceId
 ) {
 }
